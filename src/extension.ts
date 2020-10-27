@@ -264,22 +264,24 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('fzf-quick-open.runFzfSearch', async () => {
-		let pattern = await getSearchText();
-		if (pattern === undefined) {
-			return;
-		}
+		/* let pattern = await getSearchText(); */
+		/* if (pattern === undefined) { */
+		/* 	return; */
+		/* } */
+                let pattern = '';
 		let term = showFzfTerminal(TERMINAL_NAME, fzfTerminal);
-		term.sendText(makeSearchCmd(pattern), true);
+		term.sendText(makeBlankSearchCmd(pattern), true);
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('fzf-quick-open.runFzfSearchPwd', async () => {
-		let pattern = await getSearchText();
-		if (pattern === undefined) {
-			return;
-		}
+		/* let pattern = await getSearchText(); */
+		/* if (pattern === undefined) { */
+		/* 	return; */
+		/* } */
+                let pattern = '';
 		let term = showFzfTerminal(TERMINAL_NAME_PWD, fzfTerminalPwd);
 		moveToPwd(term);
-		term.sendText(makeSearchCmd(pattern), true);
+		term.sendText(makeBlankSearchCmd(pattern), true);
 	}));
 
 	vscode.window.onDidCloseTerminal((terminal) => {
@@ -330,4 +332,13 @@ export function deactivate() {
 export function makeSearchCmd(pattern: string): string {
 	let q = getQuote();
 	return `rg ${q}${pattern}${q} ${rgCaseFlag} --vimgrep --color ansi | ${getFzfCmd()} --ansi | ${getFzfPipeScript()} rg "${getFzfPipe()}"`;
+}
+
+/**
+ * Return the command used to invoke rg. Exported to allow unit testing.
+ * @param pattern Pattern to search for
+ */
+export function makeBlankSearchCmd(pattern: string): string {
+	let q = getQuote();
+        return `fzf --ansi --multi --delimiter : --color hl:4,hl+:12 --phony --query ${q}${pattern}${q} --bind ${q}change:reload:rg --vimgrep --color ansi --column --line-number --no-heading --smart-case -- {q}${q} | ${getFzfPipeScript()} rg "${getFzfPipe()}"`
 }
